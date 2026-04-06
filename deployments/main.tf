@@ -146,6 +146,7 @@ module "ecr" {
     "coastlines"      = { is_mutable = true }
     "terriamap"       = {}
     "ows"             = {}
+    "dc-explorer"     = {}
   }
 
   github_org = "piksel-ina"
