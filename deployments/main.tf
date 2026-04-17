@@ -80,37 +80,6 @@ module "records_staging_big" {
   depends_on = [module.zones]
 }
 
-# Github Pages Records for staging 
-module "gh_page_records_staging" {
-  source  = "terraform-aws-modules/route53/aws//modules/records"
-  version = "~> 3.0"
-
-  zone_id = module.zones.route53_zone_zone_id["staging.piksel.big.go.id"]
-
-  records = [
-    {
-      name = ""
-      type = "A"
-      ttl  = 300
-      records = [
-        "185.199.108.153",
-        "185.199.109.153",
-        "185.199.110.153",
-        "185.199.111.153"
-      ]
-    },
-    # Add CNAME for www subdomain
-    {
-      name    = "www"
-      type    = "CNAME"
-      ttl     = 300
-      records = ["staging.piksel.big.go.id"]
-    }
-  ]
-
-  depends_on = [module.zones]
-}
-
 # IRSA for ExternaDNS 
 module "irsa-externaldns" {
   source = "../external-dns-irsa"
