@@ -132,3 +132,10 @@ resource "aws_cognito_user_group" "power_users" {
   description  = "Unlock jupyter large instance"
 }
 
+# Argo User Group
+resource "aws_cognito_user_group" "argo_user" {
+  name         = "argo-user"
+  user_pool_id = aws_cognito_user_pool.this.id
+  description  = "Argo Workflows data-production user"
+}
+
