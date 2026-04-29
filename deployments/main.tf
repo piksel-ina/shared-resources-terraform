@@ -116,6 +116,8 @@ module "ecr" {
     "terriamap"       = {}
     "ows"             = {}
     "dc-explorer"     = {}
+    "jupyter-lab"     = {}
+    "jupyter-dev"     = {}
   }
 
   github_org = "piksel-ina"
