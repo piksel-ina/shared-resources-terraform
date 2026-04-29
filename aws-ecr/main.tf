@@ -4,10 +4,15 @@ locals {
   ecr_principals  = [for account_id in values(var.account_ids) : "arn:aws:iam::${account_id}:root"]
   project         = lower(var.project)
 
+  cached_repos = {
+    for repo_name, repo_cfg in var.ecr_repos :
+    repo_name => repo_cfg
+    if try(repo_cfg.cached, false) == true
+  }
+
   lifecycle_rules_by_repo = {
     for repo_name, repo_cfg in var.ecr_repos :
     repo_name => concat(
-      # Rule 1: Keep last N tagged images (any tag)
       [
         {
           rulePriority = 1
@@ -21,7 +26,6 @@ locals {
           action = { type = "expire" }
         }
       ],
-      # Rule 2: Expire untagged images
       try(repo_cfg.expire_untagged_after_days, 7) > 0
       ? [
         {
@@ -38,6 +42,34 @@ locals {
       ]
       : []
     )
+  }
+
+  cache_lifecycle_rules = {
+    for repo_name in keys(local.cached_repos) :
+    repo_name => [
+      {
+        rulePriority = 1
+        description  = "Keep last 1 tagged cache image"
+        selection = {
+          tagStatus      = "tagged"
+          tagPatternList = ["*"]
+          countType      = "imageCountMoreThan"
+          countNumber    = 1
+        }
+        action = { type = "expire" }
+      },
+      {
+        rulePriority = 2
+        description  = "Expire untagged cache images older than 14 days"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 14
+        }
+        action = { type = "expire" }
+      }
+    ]
   }
 }
 
@@ -60,6 +92,58 @@ resource "aws_ecr_lifecycle_policy" "this" {
   for_each   = var.ecr_repos
   repository = aws_ecr_repository.this[each.key].name
   policy     = jsonencode({ rules = local.lifecycle_rules_by_repo[each.key] })
+}
+
+# --- AWS ECR Cache Repos ---
+resource "aws_ecr_repository" "cache" {
+  for_each = local.cached_repos
+
+  name                 = "${each.key}-cache"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = false
+  }
+
+  tags = merge(local.tags, {
+    Purpose = "build-cache"
+  })
+}
+
+resource "aws_ecr_lifecycle_policy" "cache" {
+  for_each   = local.cached_repos
+  repository = aws_ecr_repository.cache[each.key].name
+  policy     = jsonencode({ rules = local.cache_lifecycle_rules[each.key] })
+}
+
+resource "aws_ecr_repository_policy" "cache" {
+  for_each   = local.cached_repos
+  repository = aws_ecr_repository.cache[each.key].name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "GithubActionsCacheAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = aws_iam_role.github_actions.arn
+        }
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:DescribeRepositories",
+          "ecr:ListImages",
+          "ecr:DescribeImages"
+        ]
+      }
+    ]
+  })
 }
 
 
@@ -124,7 +208,10 @@ resource "aws_iam_policy" "github_actions" {
           "ecr:ListImages",
           "ecr:DescribeImages"
         ]
-        Resource = [for r in aws_ecr_repository.this : r.arn]
+        Resource = concat(
+          [for r in aws_ecr_repository.this : r.arn],
+          [for r in aws_ecr_repository.cache : r.arn]
+        )
       }
     ]
   })

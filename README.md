@@ -63,6 +63,25 @@ Shared Docker image repository accessible by all workload accounts.
 - Centralized image scanning and vulnerability management
 - Reduced storage costs
 
+#### ECR Build Cache
+
+Repos with `cached = true` get a companion `-cache` repo for Docker build caching in GitHub Actions.
+
+```yaml
+# .github/workflows/build.yml (example for ows)
+- uses: aws-actions/amazon-ecr-login@v2
+  id: ecr
+
+- uses: docker/setup-buildx-action@v3
+
+- run: |
+    docker buildx build \
+      --cache-from type=registry,ref=${{ secrets.ECR_REGISTRY }}/ows-cache:buildcache \
+      --cache-to type=registry,ref=${{ secrets.ECR_REGISTRY }}/ows-cache:buildcache,mode=max \
+      --push \
+      -t ${{ secrets.ECR_REGISTRY }}/ows:${{ github.sha }} .
+```
+
 ### 3. AWS Cognito SSO (Steps 8-11)
 
 Centralized authentication service enabling Single Sign-On across all applications.

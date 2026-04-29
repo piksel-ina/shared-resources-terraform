@@ -114,10 +114,10 @@ module "ecr" {
     "data-production" = {}
     "coastlines"      = { is_mutable = true }
     "terriamap"       = {}
-    "ows"             = {}
+    "ows"             = { cached = true }
     "dc-explorer"     = {}
-    "jupyter-lab"     = {}
-    "jupyter-dev"     = {}
+    "jupyter-lab"     = { cached = true }
+    "jupyter-dev"     = { cached = true }
   }
 
   github_org = "piksel-ina"

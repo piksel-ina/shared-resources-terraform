@@ -74,6 +74,11 @@ output "ecr_repositories" {
   }
 }
 
+output "ecr_cache_repositories" {
+  description = "ECR cache repositories information (key = original repo name)"
+  value       = module.ecr.ecr_cache_repository_urls
+}
+
 # --- IAM Roles ---
 output "iam_roles" {
   description = "IAM roles for various services"

@@ -13,6 +13,11 @@ output "ecr_repository_urls" {
   value       = { for k, v in aws_ecr_repository.this : k => v.repository_url }
 }
 
+output "ecr_cache_repository_urls" {
+  description = "Map of ECR cache repository URLs (key = original repo name)"
+  value       = { for k, v in aws_ecr_repository.cache : k => v.repository_url }
+}
+
 output "github_actions_role_arn" {
   description = "ARN of the IAM role for GitHub Actions"
   value       = aws_iam_role.github_actions.arn
