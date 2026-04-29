@@ -110,7 +110,7 @@ module "ecr" {
 
   ecr_repos = {
     "piksel-core"     = { keep_last = 8 }
-    "odc"             = {}
+    "inadc-core"      = { cached = true }
     "data-production" = {}
     "coastlines"      = { is_mutable = true }
     "terriamap"       = {}
