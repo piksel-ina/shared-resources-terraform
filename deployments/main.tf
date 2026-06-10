@@ -116,8 +116,10 @@ module "ecr" {
     "terriamap"       = {}
     "ows"             = { cached = true }
     "dc-explorer"     = {}
+    "inadc-ows"       = { cached = true }
     "jupyter-lab"     = { cached = true }
     "jupyter-dev"     = { cached = true }
+    "geomad"          = {}
   }
 
   github_org = "piksel-ina"
