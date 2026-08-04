@@ -63,6 +63,12 @@ resource "aws_cognito_user_pool" "this" {
     }
   }
 
+  mfa_configuration = "ON"
+
+  software_token_mfa_configuration {
+    enabled = true
+  }
+
   deletion_protection = "ACTIVE"
 
   tags = var.default_tags
