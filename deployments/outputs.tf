@@ -18,23 +18,6 @@ output "route53_zones" {
   }
 }
 
-# --- Route53 Zones (pik-sel.id domain) ---
-output "piksel_id_zones" {
-  description = "Route53 zones for pik-sel.id domain"
-  value = {
-    production = {
-      zone_id      = module.zones.route53_zone_zone_id["pik-sel.id"]
-      name_servers = module.zones.route53_zone_name_servers["pik-sel.id"]
-      domain       = "pik-sel.id"
-    }
-    staging = {
-      zone_id      = module.zones.route53_zone_zone_id["staging.pik-sel.id"]
-      name_servers = module.zones.route53_zone_name_servers["staging.pik-sel.id"]
-      domain       = "staging.pik-sel.id"
-    }
-  }
-}
-
 # --- Route53 Zones (piksel.big.go.id domain) ---
 output "piksel_big_go_id_zones" {
   description = "Route53 zones for piksel.big.go.id domain - Delegate name servers to big.go.id"

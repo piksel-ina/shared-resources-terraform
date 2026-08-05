@@ -13,18 +13,6 @@ module "zones" {
   version = "~> 3.0"
 
   zones = {
-    "staging.pik-sel.id" = {
-      comment = "staging.pik-sel.id"
-      tags = {
-        Environment = "staging"
-      }
-    },
-    "pik-sel.id" = {
-      comment = "pik-sel.id main domain"
-      tags = {
-        Environment = "production"
-      }
-    },
     "piksel.big.go.id" = {
       comment = "piksel.big.go.id main domain"
       tags = {
@@ -44,24 +32,6 @@ module "zones" {
   })
 }
 
-# Create NS record in parent domain for staging subdomain
-module "records" {
-  source  = "terraform-aws-modules/route53/aws//modules/records"
-  version = "~> 3.0"
-
-  zone_id = module.zones.route53_zone_zone_id["pik-sel.id"]
-
-  records = [
-    {
-      name    = "staging"
-      type    = "NS"
-      ttl     = 300
-      records = module.zones.route53_zone_name_servers["staging.pik-sel.id"]
-    }
-  ]
-  depends_on = [module.zones]
-}
-
 # Create NS record in parent domain for staging subdomain in piksel.big.go.id
 module "records_staging_big" {
   source  = "terraform-aws-modules/route53/aws//modules/records"
@@ -77,8 +47,6 @@ module "records_staging_big" {
       records = module.zones.route53_zone_name_servers["staging.piksel.big.go.id"]
     }
   ]
-
-  depends_on = [module.zones]
 }
 
 # IRSA for ExternaDNS 
@@ -94,14 +62,14 @@ module "irsa-externaldns" {
       account_id           = local.staging_account_id
       namespace            = "external-dns"
       service_account_name = "external-dns-sa"
-      hosted_zone_names    = ["staging.pik-sel.id", "staging.piksel.big.go.id"]
+      hosted_zone_names    = ["staging.piksel.big.go.id"]
     },
     {
       env                  = "production"
       account_id           = local.production_account_id
       namespace            = "external-dns"
       service_account_name = "external-dns-sa"
-      hosted_zone_names    = ["pik-sel.id", "piksel.big.go.id"]
+      hosted_zone_names    = ["piksel.big.go.id"]
     }
   ]
 }
