@@ -1,72 +1,28 @@
-# AGENTS.md - Piksel-Hub
-
-Terraform infrastructure for shared AWS resources consumed by environment-specific repos (staging, production).
-
-## Project Context
-
-- **Terraform 1.x** + AWS Provider
-- **Main region:** `ap-southeast-3`
-- **State:** Local per module — never commit `.terraform/` or `*.tfstate*`
-- **Modules:** prefer `terraform-aws-modules` from registry
-
-## Repository Structure
-
-| Directory | Purpose |
-|-----------|---------|
-| `deployments/` | **Single entrypoint** — always run commands from here |
-| `aws-ecr/` | ECR repositories |
-| `aws-cognito-user-pool/` | Cognito configuration |
-| `external-dns-irsa/` | IAM roles for external-dns |
-| `aws-s3-static-hosting/` | S3 static hosting |
-
-Each module:
-```
-module-name/
-├── main.tf
-├── variables.tf
-├── outputs.tf
-├── providers.tf
-└── config/
-```
+# AGENTS.md
 
 ## Commands
+Run from the repository root.
 
-**Always run from the `deployments/` entrypoint. Never target individual module directories.**
+| Task | Command | Notes |
+|---|---|---|
+| Check formatting | `terraform fmt -recursive -check -diff` | Non-mutating; checks every Terraform directory. |
+| Format Terraform | `make fmt` | Formats every `.tf` file recursively. |
+| Validate shared deployment | `make validate` | Validates `deployments/` and the modules it calls. |
 
-```bash
-make init
-make validate
-make fmt
-make plan
-make apply    # also triggers backup.sh post-apply
-make destroy
-```
+## Configuration boundaries
+- The Makefile defaults `dir` to `deployments/`; it accepts a `dir` override for other Terraform roots.
+- `deployments/main.tf` is the shared deployment composition root. It calls `aws-ecr/`, `aws-cognito-user-pool/`, and `external-dns-irsa/`.
+- `aws-s3-static-hosting/` is not called from `deployments/` and currently does not validate as a standalone root. Resolve its undeclared Route53 data source and logging-bucket output before treating it as deployable.
+- `aws-cognito-user-pool/config/` contains the HTML templates loaded by the Cognito user-pool resource.
 
-Always run before committing:
-```bash
-make validate && make fmt
-```
+## State and apply
+- Terraform state is local and ignored by Git. Preserve that policy.
+- The Makefile’s apply target runs `deployments/backup.sh` after a successful apply. Preserve this backup step when changing the apply workflow.
+- Do not run apply or destroy without explicit confirmation.
 
-## Code Conventions
+## Conventions
+- Use `jsonencode()` for IAM policies; see `aws-ecr/main.tf` and `external-dns-irsa/main.tf`.
+- Use the `us_east_1` provider alias for ACM certificates used by Cognito or CloudFront; see `deployments/providers.tf`.
 
-### Do
-- `snake_case` for all — variables, outputs, resources, files
-- Singleton resource → use `this` (e.g. `aws_vpc.this`)
-- Always include `description` on every variable
-- Tags: always `merge(var.default_tags, { ManagedBy = "Terraform" })`
-- IAM policies: use `jsonencode()`
-- Use `optional()` + `try()` for flexible variable configs
-- Aliased provider for us-east-1: `alias = "us_east_1"`
-
-### Don't
-- Don't run `plan`/`apply`/`destroy` from individual module directories
-- Don't commit `.terraform/`, `*.tfstate`, or `*.tfstate.backup`
-- Don't hardcode account IDs — use `data "aws_caller_identity" "current"`
-
-## Linting (Optional)
-
-```bash
-tfsec .
-tflint --module
-checkov -d .
-```
+## Current validation blocker
+- `make dir=aws-s3-static-hosting validate` fails because `aws-s3-static-hosting/main.tf` references `data.aws_route53_zone.main` without declaring it, and `aws-s3-static-hosting/outputs.tf` references an undeclared `aws_s3_bucket.docs_logs`.
