@@ -1,6 +1,7 @@
 locals {
-  staging_account_id = "326641642924"
-  dev_account_id     = "236122835646"
+  staging_account_id    = "326641642924"
+  dev_account_id        = "236122835646"
+  production_account_id = "522783511350"
 }
 
 
@@ -94,6 +95,13 @@ module "irsa-externaldns" {
       namespace            = "external-dns"
       service_account_name = "external-dns-sa"
       hosted_zone_names    = ["staging.pik-sel.id", "staging.piksel.big.go.id"]
+    },
+    {
+      env                  = "production"
+      account_id           = local.production_account_id
+      namespace            = "external-dns"
+      service_account_name = "external-dns-sa"
+      hosted_zone_names    = ["pik-sel.id", "piksel.big.go.id"]
     }
   ]
 }
@@ -125,8 +133,9 @@ module "ecr" {
   github_org = "piksel-ina"
 
   account_ids = {
-    "dev"     = local.dev_account_id
-    "staging" = local.staging_account_id
+    "dev"        = local.dev_account_id
+    "staging"    = local.staging_account_id
+    "production" = local.production_account_id
   }
 
   default_tags = var.default_tags
