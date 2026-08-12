@@ -189,6 +189,30 @@ module "cognito_user_pool" {
       callback_urls        = ["https://grafana.staging.piksel.big.go.id/login/generic_oauth"]
       logout_urls          = ["https://grafana.staging.piksel.big.go.id/"]
       generate_secret      = true
+    },
+    {
+      name                 = "argo-workflows-production"
+      allowed_oauth_flows  = ["code"]
+      allowed_oauth_scopes = ["email", "openid", "profile"]
+      callback_urls        = ["https://argo.piksel.big.go.id/oauth2/callback"]
+      logout_urls          = ["https://argo.piksel.big.go.id/"]
+      generate_secret      = true
+    },
+    {
+      name                 = "jupyterhub-production"
+      allowed_oauth_flows  = ["code"]
+      allowed_oauth_scopes = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
+      callback_urls        = ["https://sandbox.piksel.big.go.id/hub/oauth_callback"]
+      logout_urls          = ["https://sandbox.piksel.big.go.id/"]
+      generate_secret      = true
+    },
+    {
+      name                 = "grafana-production"
+      allowed_oauth_flows  = ["code"]
+      allowed_oauth_scopes = ["email", "openid", "profile"]
+      callback_urls        = ["https://grafana.piksel.big.go.id/login/generic_oauth"]
+      logout_urls          = ["https://grafana.piksel.big.go.id/"]
+      generate_secret      = true
     }
   ]
 
