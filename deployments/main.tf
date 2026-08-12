@@ -74,6 +74,22 @@ module "irsa-externaldns" {
   ]
 }
 
+module "externaldns-pod-identity-production" {
+  source = "../external-dns-pod-identity"
+
+  environment          = "production"
+  workload_account_id  = local.production_account_id
+  source_role_arn      = "arn:aws:iam::${local.production_account_id}:role/piksel-production-external-dns"
+  cluster_arn          = "arn:aws:eks:${var.aws_region}:${local.production_account_id}:cluster/piksel-production"
+  namespace            = "external-dns"
+  service_account_name = "external-dns-sa"
+  hosted_zone_ids = [
+    module.zones.route53_zone_zone_id["piksel.big.go.id"]
+  ]
+
+  default_tags = var.default_tags
+}
+
 # --- ECR Setup ---
 
 data "aws_caller_identity" "current" {}

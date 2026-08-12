@@ -45,6 +45,16 @@ output "externaldns_irsa" {
   }
 }
 
+output "externaldns_pod_identity" {
+  description = "ExternalDNS Pod Identity target-role configuration"
+  value = {
+    production = {
+      role_arn   = module.externaldns-pod-identity-production.role_arn
+      policy_arn = module.externaldns-pod-identity-production.policy_arn
+    }
+  }
+}
+
 # --- ECR Repository ---
 output "ecr_repositories" {
   description = "ECR repositories information"
