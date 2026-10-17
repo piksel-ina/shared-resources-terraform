@@ -112,6 +112,9 @@ module "ecr" {
     "jupyter-lab"     = { cached = true }
     "jupyter-dev"     = { cached = true }
     "geomad"          = {}
+    "jupyter-gpu" = {
+      push_principals = ["arn:aws:iam::${local.staging_account_id}:role/piksel-admin-role"]
+    }
   }
 
   github_org = "piksel-ina"

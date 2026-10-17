@@ -31,6 +31,7 @@ variable "ecr_repos" {
     expire_untagged_after_days = optional(number, 7)
     is_mutable                 = optional(bool, false)
     cached                     = optional(bool, false)
+    push_principals            = optional(list(string), [])
   }))
 }
 

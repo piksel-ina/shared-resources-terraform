@@ -226,7 +226,7 @@ resource "aws_ecr_repository_policy" "this" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Sid    = "GithubActionsAccess"
         Effect = "Allow"
@@ -258,7 +258,26 @@ resource "aws_ecr_repository_policy" "this" {
           "ecr:BatchCheckLayerAvailability"
         ]
       }
-    ]
+      ], length(each.value.push_principals) > 0 ? [
+      {
+        Sid    = "CrossAccountPush"
+        Effect = "Allow"
+        Principal = {
+          AWS = each.value.push_principals
+        }
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:DescribeImages",
+          "ecr:ListImages"
+        ]
+      }
+    ] : [])
   })
 }
 
