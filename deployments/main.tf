@@ -163,13 +163,37 @@ resource "aws_acm_certificate_validation" "cognito_cert" {
   validation_record_fqdns = [for record in aws_route53_record.cognito_cert_validation : record.fqdn]
 }
 
-# Placeholder A record
+# Production website apex records
 resource "aws_route53_record" "piksel_root" {
   zone_id = module.zones.route53_zone_zone_id["piksel.big.go.id"]
   name    = "piksel.big.go.id"
   type    = "A"
-  ttl     = 300
-  records = ["127.0.0.1"]
+  ttl     = var.website_cloudfront_domain_name == null ? 300 : null
+  records = var.website_cloudfront_domain_name == null ? ["127.0.0.1"] : null
+
+  dynamic "alias" {
+    for_each = var.website_cloudfront_domain_name == null ? [] : [var.website_cloudfront_domain_name]
+
+    content {
+      name                   = alias.value
+      zone_id                = "Z2FDTNDATAQYW2"
+      evaluate_target_health = false
+    }
+  }
+}
+
+resource "aws_route53_record" "piksel_root_ipv6" {
+  count = var.website_cloudfront_domain_name == null ? 0 : 1
+
+  zone_id = module.zones.route53_zone_zone_id["piksel.big.go.id"]
+  name    = "piksel.big.go.id"
+  type    = "AAAA"
+
+  alias {
+    name                   = var.website_cloudfront_domain_name
+    zone_id                = "Z2FDTNDATAQYW2"
+    evaluate_target_health = false
+  }
 }
 
 # Cognito User Pool Module

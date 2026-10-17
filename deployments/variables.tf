@@ -75,3 +75,15 @@ variable "auth_domain" {
   type        = string
   default     = "oauth.piksel.big.go.id"
 }
+
+variable "website_cloudfront_domain_name" {
+  description = "CloudFront domain serving the production website; null keeps the pre-cutover placeholder"
+  type        = string
+  default     = "d3gi2an0j9pzay.cloudfront.net"
+  nullable    = true
+
+  validation {
+    condition     = var.website_cloudfront_domain_name == null || endswith(var.website_cloudfront_domain_name, ".cloudfront.net")
+    error_message = "website_cloudfront_domain_name must be null or an AWS CloudFront domain name."
+  }
+}
