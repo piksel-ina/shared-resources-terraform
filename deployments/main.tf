@@ -264,6 +264,18 @@ module "cognito_user_pool" {
   depends_on = [aws_route53_record.piksel_root]
 }
 
+# SES identity for Cognito invite and recovery email
+module "ses_cognito" {
+  source = "../aws-ses-cognito"
+
+  domain             = "piksel.big.go.id"
+  zone_id            = module.zones.route53_zone_zone_id["piksel.big.go.id"]
+  user_pool_arn      = module.cognito_user_pool.user_pool_arn
+  notification_email = "piksel@big.go.id"
+
+  default_tags = var.default_tags
+}
+
 # DNS Record for Custom Domain (Alias to CloudFront)
 resource "aws_route53_record" "cognito_auth_domain" {
   zone_id = module.zones.route53_zone_zone_id["piksel.big.go.id"]

@@ -118,3 +118,13 @@ output "cognito_client_ids" {
   description = "Map of Cognito Client Name to Client ID"
   value       = module.cognito_user_pool.client_ids
 }
+
+# --- SES for Cognito ---
+output "ses_cognito" {
+  description = "SES identity and configuration set used by the Cognito user pool"
+  value = {
+    identity_arn           = module.ses_cognito.identity_arn
+    configuration_set_name = module.ses_cognito.configuration_set_name
+    events_topic_arn       = module.ses_cognito.events_topic_arn
+  }
+}
