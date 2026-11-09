@@ -101,6 +101,7 @@ resource "aws_ecr_repository" "cache" {
 
   name                 = "${each.key}-cache"
   image_tag_mutability = "MUTABLE"
+  force_delete         = try(each.value.force_delete, false)
 
   image_scanning_configuration {
     scan_on_push = false

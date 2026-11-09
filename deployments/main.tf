@@ -101,7 +101,6 @@ module "ecr" {
   current_account_id = data.aws_caller_identity.current.account_id
 
   ecr_repos = {
-    "inadc-core"  = { cached = true }
     "inadc-odc"   = { keep_last = 2, cached = true }
     "coastlines"  = { is_mutable = true }
     "terriamap"   = {}
