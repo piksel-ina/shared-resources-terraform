@@ -24,6 +24,11 @@ variable "github_org" {
   type        = string
 }
 
+variable "github_org_id" {
+  description = "The immutable GitHub organization ID used in OIDC subject claims"
+  type        = string
+}
+
 variable "ecr_repos" {
   type = map(object({
     tag_prefixes               = optional(list(string), null)

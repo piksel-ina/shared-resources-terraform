@@ -116,7 +116,8 @@ module "ecr" {
     }
   }
 
-  github_org = "piksel-ina"
+  github_org    = "piksel-ina"
+  github_org_id = "198023810"
 
   account_ids = {
     "dev"        = local.dev_account_id
