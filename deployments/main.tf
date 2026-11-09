@@ -101,17 +101,16 @@ module "ecr" {
   current_account_id = data.aws_caller_identity.current.account_id
 
   ecr_repos = {
-    "piksel-core"     = { keep_last = 8 }
-    "inadc-core"      = { cached = true }
-    "data-production" = {}
-    "coastlines"      = { is_mutable = true }
-    "terriamap"       = {}
-    "ows"             = { cached = true }
-    "dc-explorer"     = {}
-    "inadc-ows"       = { cached = true }
-    "jupyter-lab"     = { cached = true }
-    "jupyter-dev"     = { cached = true }
-    "geomad"          = {}
+    "inadc-core"  = { cached = true }
+    "inadc-odc"   = { keep_last = 2, cached = true }
+    "coastlines"  = { is_mutable = true }
+    "terriamap"   = {}
+    "ows"         = { cached = true }
+    "dc-explorer" = {}
+    "inadc-ows"   = { cached = true }
+    "jupyter-lab" = { cached = true }
+    "jupyter-dev" = { cached = true }
+    "geomad"      = {}
     "jupyter-gpu" = {
       push_principals = ["arn:aws:iam::${local.staging_account_id}:role/piksel-admin-role"]
     }
