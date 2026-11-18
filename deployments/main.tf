@@ -90,6 +90,22 @@ module "externaldns-pod-identity-production" {
   default_tags = var.default_tags
 }
 
+module "externaldns-pod-identity-staging" {
+  source = "../external-dns-pod-identity"
+
+  environment          = "staging"
+  workload_account_id  = local.staging_account_id
+  source_role_arn      = "arn:aws:iam::${local.staging_account_id}:role/piksel-staging-external-dns"
+  cluster_arn          = "arn:aws:eks:${var.aws_region}:${local.staging_account_id}:cluster/piksel-staging"
+  namespace            = "external-dns"
+  service_account_name = "external-dns-sa"
+  hosted_zone_ids = [
+    module.zones.route53_zone_zone_id["staging.piksel.big.go.id"]
+  ]
+
+  default_tags = var.default_tags
+}
+
 # --- ECR Setup ---
 
 data "aws_caller_identity" "current" {}
