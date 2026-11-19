@@ -145,3 +145,10 @@ resource "aws_cognito_user_group" "argo_user" {
   description  = "Argo Workflows data-production user"
 }
 
+# Staging Users Group
+resource "aws_cognito_user_group" "staging_users" {
+  name         = "staging-users"
+  user_pool_id = aws_cognito_user_pool.this.id
+  description  = "Allowed users for staging JupyterHub"
+}
+
